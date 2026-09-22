@@ -1,188 +1,285 @@
-# 📄 Resume Builder
+# Resume Builder
 
-A full-stack **MERN** (MongoDB, Express, React, Node.js) application that lets users create, customize, and export professional resumes with multiple templates, AI-powered content enhancement, and shareable public links.
+A full-stack MERN application for creating, editing, customizing, and sharing professional resumes. Resume Builder combines a guided React editor with reusable templates, JWT authentication, MongoDB persistence, AI-assisted writing, profile image uploads, and public read-only resume pages.
 
----
+## Features
 
-## ✨ Features
+- Register and sign in with JWT-based authentication.
+- Create and manage multiple resumes from a personal dashboard.
+- Edit personal information, professional summary, experience, education, projects, and skills.
+- Choose from Classic, Modern, Minimal, and Minimal Image templates.
+- Customize the resume accent color.
+- Enhance professional summaries and job descriptions with OpenAI.
+- Upload an existing resume as text for AI-assisted data extraction.
+- Upload a profile image and store it with ImageKit.
+- Toggle a resume between private and public visibility.
+- Share public resumes through `/view/:resumeId`.
+- Print the rendered resume from the browser using the builder's Download action.
+- Responsive React interface with toast notifications and icon-based controls.
 
-- **User Authentication** – Secure signup/login with JWT-based sessions and hashed passwords (bcrypt).
-- **Multiple Resume Templates** – Choose from Classic, Modern, Minimal, and Minimal Image layouts.
-- **Section Management** – Add and edit Personal Info, Professional Summary, Experience, Education, Projects, and Skills.
-- **Color Customization** – Pick an accent color to personalize each resume.
-- **AI-Powered Enhancements** – Improve your professional summary and job descriptions using OpenAI.
-- **Resume Parsing** – Upload an existing resume (PDF) and extract text to speed up profile creation.
-- **Image Uploads** – Profile photo uploads handled via Multer and stored on ImageKit.
-- **Public Sharing** – Publish a resume and share it via a public, read-only link.
-- **Dashboard** – View, manage, and organize all your saved resumes in one place.
-- **Responsive UI** – Built with Tailwind CSS for a clean experience across devices.
+## Architecture
 
----
+```mermaid
+flowchart LR
+    Browser[Browser]
+    Client[React + Vite client]
+    Redux[Redux Toolkit auth state]
+    API[Axios API client]
+    Server[Express API server]
+    Auth[JWT auth middleware]
+    Controllers[User, resume, and AI controllers]
+    Mongo[(MongoDB)]
+    OpenAI[OpenAI-compatible API]
+    ImageKit[ImageKit]
 
-## 🛠️ Tech Stack
+    Browser --> Client
+    Client --> Redux
+    Client --> API
+    API --> Server
+    Server --> Auth
+    Auth --> Controllers
+    Server --> Controllers
+    Controllers --> Mongo
+    Controllers --> OpenAI
+    Controllers --> ImageKit
+```
 
-**Frontend (`/client`)**
-- React 19 + Vite 7
-- Redux Toolkit (state management)
-- React Router v7
+The client and server are separate applications:
+
+- `client/` contains the Vite-powered React UI, route-level pages, Redux state, forms, templates, and API client.
+- `server/` contains the Express server, JWT middleware, controllers, Mongoose models, file upload handling, and integrations with OpenAI and ImageKit.
+- MongoDB stores users and resume documents. Images are uploaded to ImageKit rather than stored in MongoDB.
+
+## Tech Stack
+
+### Frontend
+
+- React 19
+- Vite 7
+- React Router
+- Redux Toolkit and React Redux
 - Tailwind CSS 4
 - Axios
 - React Hot Toast
-- Lucide React (icons)
-- react-pdftotext (resume text extraction)
+- Lucide React
+- `react-pdftotext` for extracting text from uploaded PDF resumes
 
-**Backend (`/server`)**
-- Node.js + Express 5
-- MongoDB + Mongoose
-- JSON Web Tokens (JWT) for auth
-- bcrypt for password hashing
-- Multer for file uploads
-- ImageKit SDK for image hosting
-- OpenAI SDK for AI-based content generation
-- dotenv, cors
+### Backend
 
----
+- Node.js with ES modules
+- Express 5
+- MongoDB with Mongoose
+- JSON Web Tokens
+- bcrypt
+- Multer
+- ImageKit Node SDK
+- OpenAI SDK
+- dotenv and CORS
 
-## 📁 Project Structure
+## Project Structure
 
-```
+```text
 Resume-Builder/
-├── client/                     # React frontend
-│   ├── src/
-│   │   ├── app/                # Redux store & slices
-│   │   ├── assets/             # Static assets & resume templates
-│   │   ├── components/         # Reusable UI & template components
-│   │   ├── configs/            # Axios API config
-│   │   └── pages/               # Route-level pages (Home, Dashboard, Builder, Preview, Login)
-│   └── package.json
-│
-└── server/                     # Express backend
-    ├── configs/                 # DB, OpenAI, ImageKit, Multer configs
-    ├── controllers/              # Route logic (user, resume, AI)
-    ├── middlewares/              # JWT auth middleware
-    ├── models/                   # Mongoose schemas (User, Resume)
-    ├── routes/                   # API route definitions
-    ├── server.js                 # App entry point
-    └── package.json
+|-- client/
+|   |-- public/                     Static public assets
+|   |-- src/
+|   |   |-- app/                    Redux store and authentication slice
+|   |   |-- assets/                 Shared data, images, and resume templates
+|   |   |-- components/             Forms, preview, navigation, and home sections
+|   |   |-- configs/api.js           Axios instance
+|   |   |-- pages/                  Home, login, dashboard, builder, and preview
+|   |   |-- App.jsx                 Client route definitions
+|   |   `-- main.jsx                React entry point
+|   |-- package.json
+|   `-- vite.config.js
+|-- server/
+|   |-- configs/                    Database, AI, ImageKit, and upload setup
+|   |-- controllers/                User, resume, and AI request handlers
+|   |-- middlewares/                JWT protection middleware
+|   |-- models/                     User and resume schemas
+|   |-- routes/                     User, resume, and AI route definitions
+|   |-- server.js                   Express entry point
+|   `-- package.json
+|-- .gitignore
+`-- README.md
 ```
 
----
+## Requirements
 
-## 🚀 Getting Started
+- Node.js 18 or newer
+- npm
+- MongoDB locally or through MongoDB Atlas
+- An OpenAI API key for AI features
+- An ImageKit account and private key for profile images
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- [MongoDB](https://www.mongodb.com/) (local instance or MongoDB Atlas)
-- An [OpenAI API key](https://platform.openai.com/) for AI features
-- An [ImageKit](https://imagekit.io/) account for image uploads
+## Configuration
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/Mkn1261/Resume-Builder.git
-cd Resume-Builder
-```
+### Server environment
 
-### 2. Setup the Backend
-```bash
-cd server
-npm install
-```
+Create `server/.env`:
 
-Create a `.env` file inside `server/` with the following variables:
 ```env
 PORT=3000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
+MONGODB_URI=mongodb://127.0.0.1:27017
+JWT_SECRET=replace_with_a_long_random_secret
 OPENAI_API_KEY=your_openai_api_key
-OPENAIBASE_URL=your_openai_base_url
+OPENAIBASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=your_model_name
 IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 ```
 
-Run the server:
-```bash
-npm run server   # starts with nodemon (dev mode)
-# or
-npm start        # starts with node
+`MONGODB_URI` is used as the base connection string. The server appends the `resume-builder` database name when it connects.
+
+### Client environment
+
+Create `client/.env`:
+
+```env
+VITE_BASE_URL=http://localhost:3000
 ```
 
-### 3. Setup the Frontend
+Do not commit either `.env` file. API keys and JWT secrets must remain outside source control.
+
+## Getting Started
+
+Clone the repository and install dependencies for both applications:
+
 ```bash
+git clone https://github.com/Mkn1261/Resume-Builder.git
+cd Resume-Builder
+
+cd server
+npm install
+
 cd ../client
 npm install
 ```
 
-Create a `.env` file inside `client/` with:
-```env
-VITE_BASE_URL="http://localhost:3000"
+Start the backend in one terminal:
+
+```bash
+cd server
+npm run server
 ```
 
-Run the frontend:
+Start the frontend in another terminal:
+
 ```bash
+cd client
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173` (default Vite port), with the API running at `http://localhost:3000`.
+Open the Vite URL shown in the terminal, normally:
 
----
+```text
+http://localhost:5173
+```
 
-## 📡 API Overview
+The API runs on `http://localhost:3000` unless `PORT` is changed.
 
-### User Routes (`/api/users`)
-| Method | Endpoint    | Description              | Auth Required |
-|--------|-------------|---------------------------|:--------------:|
-| POST   | `/register` | Register a new user       | ❌ |
-| POST   | `/login`    | Log in a user              | ❌ |
-| GET    | `/data`     | Get logged-in user's data  | ✅ |
-| GET    | `/resumes`  | Get all resumes for user   | ✅ |
+For a production-style client build:
 
-### Resume Routes (`/api/resumes`)
-| Method | Endpoint          | Description                    | Auth Required |
-|--------|--------------------|---------------------------------|:--------------:|
-| POST   | `/create`          | Create a new resume             | ✅ |
-| PUT    | `/update`          | Update a resume (incl. image)   | ✅ |
-| DELETE | `/delete/:resumeId`| Delete a resume                  | ✅ |
-| GET    | `/get/:resumeId`   | Get a specific resume            | ✅ |
-| GET    | `/public/:resumeId`| Get a publicly shared resume     | ❌ |
+```bash
+cd client
+npm run build
+npm run preview
+```
 
-### AI Routes (`/api/ai`)
-| Method | Endpoint                     | Description                              | Auth Required |
-|--------|-------------------------------|--------------------------------------------|:--------------:|
-| POST   | `/enhance-pro-sum`            | Enhance the professional summary text      | ✅ |
-| POST   | `/enhance-job-description`    | Enhance an experience/job description       | ✅ |
-| POST   | `/upload-resume`              | Parse an uploaded resume                    | ✅ |
+## Application Routes
 
-> **Note:** Authenticated requests require an `Authorization` header containing the JWT token.
+| Route | Purpose | Access |
+| --- | --- | --- |
+| `/` | Landing page with product overview and calls to action | Public |
+| `/app` | Dashboard for saved resumes | Authenticated |
+| `/app/builder/:resumeId` | Guided resume editor and live preview | Authenticated |
+| `/view/:resumeId` | Read-only public resume preview | Public when the resume is public |
 
----
+## API Reference
 
-## 🖥️ Application Pages
+The client sends the JWT in the `Authorization` header. The current middleware expects the token value directly:
 
-- **Home** – Landing page with hero, features, and testimonials.
-- **Login** – User authentication (sign in / sign up).
-- **Dashboard** – View and manage all created resumes.
-- **Resume Builder** – Step-by-step form to build out a resume (personal info, summary, experience, education, projects, skills, template & color selection).
-- **Preview** – Live preview of the resume as it's being built.
-- **Public View** – Shareable, read-only view of a published resume.
+```http
+Authorization: <jwt>
+```
 
----
+### Users: `/api/users`
 
-## 🗺️ Roadmap / Ideas for Contribution
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| `POST` | `/register` | Create an account and return a token | No |
+| `POST` | `/login` | Authenticate a user and return a token | No |
+| `GET` | `/data` | Get the authenticated user's profile | Yes |
+| `GET` | `/resumes` | List resumes owned by the authenticated user | Yes |
 
-- [ ] Export resumes as PDF/Word directly from the browser
-- [ ] Add more resume templates
-- [ ] Drag-and-drop section reordering
-- [ ] Unit and integration tests
+Registration and login expect JSON containing `name`, `email`, and `password` for registration, or `email` and `password` for login.
 
-Contributions are welcome — feel free to open an issue or submit a pull request.
+### Resumes: `/api/resumes`
 
----
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| `POST` | `/create` | Create a resume from a title | Yes |
+| `GET` | `/get/:resumeId` | Get one owned resume | Yes |
+| `PUT` | `/update` | Save resume data and optionally upload an image | Yes |
+| `DELETE` | `/delete/:resumeId` | Delete an owned resume | Yes |
+| `GET` | `/public/:resumeId` | Read a public resume | No |
 
-## 📝 License
+The update endpoint accepts multipart form data. The main fields used by the client are `resumeId`, a JSON-encoded `resumeData`, an optional `image`, and the optional `removeBackground` flag.
 
-This project is open source. Feel free to use and modify it for personal or educational purposes.
+### AI: `/api/ai`
 
----
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| `POST` | `/enhance-pro-sum` | Improve a professional summary | Yes |
+| `POST` | `/enhance-job-description` | Improve a job description | Yes |
+| `POST` | `/upload-resume` | Extract structured resume data from supplied text | Yes |
 
-## 👤 Author
+The enhancement endpoints expect `{ "userContent": "..." }`. Resume extraction expects `resumeText` and can also receive a `title`.
 
-Built with ❤️ using the MERN stack.
+## Resume Data Model
+
+A resume stores the following main fields:
+
+- `title`, `public`, `template`, and `accent_color`
+- `professional_summary`
+- `skills`
+- `personal_info`: name, profession, contact details, links, and image URL
+- `experience`: company, position, dates, description, and current-role status
+- `project`: name, type, and description
+- `education`: institution, degree, field, graduation date, and GPA
+- `userId`: the owning user reference
+
+## Available Scripts
+
+### Client
+
+```bash
+npm run dev       # Start the Vite development server
+npm run build     # Build the production client bundle
+npm run lint      # Run ESLint
+npm run preview   # Preview the production build
+```
+
+### Server
+
+```bash
+npm start         # Start the server with Node.js
+npm run server    # Start the server with nodemon
+```
+
+## Security Notes
+
+- Keep `server/.env` and `client/.env` local and out of Git.
+- Use a strong, unique `JWT_SECRET` in deployed environments.
+- Restrict CORS and configure HTTPS before deploying publicly.
+- Do not expose the ImageKit private key or OpenAI key to the browser.
+- Validate uploaded files and request sizes before exposing the upload endpoint publicly.
+
+## Current Limitations
+
+- Resume download currently uses the browser print dialog; there is no server-side PDF or Word export.
+- The application does not include automated test suites yet.
+- A running MongoDB instance and external AI/ImageKit credentials are required for the full feature set.
+
+## License
+
+No license has been specified for this project yet.
