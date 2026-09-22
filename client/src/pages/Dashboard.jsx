@@ -46,9 +46,18 @@ const Dashboard = () => {
   }
   const uploadResume = async (event) => {
     event.preventDefault()
+    if (!resume) {
+      toast.error('Please select a PDF resume first')
+      return
+    }
+
     setIsLoading(true)
     try {
       const resumeText = await pdfToText(resume)
+      if (!resumeText.trim()) {
+        throw new Error('Could not extract text from this PDF')
+      }
+
       const {data} = await api.post('/api/ai/upload-resume', {title, resumeText}, {headers: {Authorization: token}})
       setTitle('')
       setResume(null)

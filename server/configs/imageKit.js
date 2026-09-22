@@ -1,8 +1,13 @@
 import ImageKit from '@imagekit/nodejs';
 
-const imageKit = new ImageKit({
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-});
+const getImageKit = () => {
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
 
+  if (!privateKey) {
+    throw new Error('IMAGEKIT_PRIVATE_KEY is not configured');
+  }
 
-export default imageKit
+  return new ImageKit({ privateKey });
+};
+
+export default getImageKit;

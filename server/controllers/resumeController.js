@@ -1,4 +1,4 @@
-import ImageKit from "../configs/imageKit.js";
+import getImageKit from "../configs/imageKit.js";
 import Resume from "../models/resume.js";
 import fs from 'fs';
 
@@ -97,8 +97,9 @@ export const updateResume = async (req, res) => {
         if (image) {
 
             const imageBufferData = fs.createReadStream(image.path)
+            const imageKit = getImageKit();
 
-            const response = await ImageKit.files.upload({
+            const response = await imageKit.files.upload({
                 file: imageBufferData,
                 fileName: 'resume.png',
                 folder: 'user-resume',
@@ -110,7 +111,11 @@ export const updateResume = async (req, res) => {
             resumeDataCopy.personal_info.image = response.url
         }
 
-        const resume = await Resume.findOneAndDelete({ userId, _id: resumeId }, resumeDataCopy, { new: true })
+        const resume = await Resume.findOneAndUpdate(
+            { userId, _id: resumeId },
+            resumeDataCopy,
+            { new: true }
+        )
 
         return res.status(200).json({ message: 'saved successfully', resume })
     } catch (error) {
